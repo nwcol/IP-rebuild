@@ -1,5 +1,10 @@
 import numpy as np
 
+import matplotlib.pyplot as plt 
+
+ 
+plt.rcParams['figure.dpi'] = 300
+
 """
 ind: 
     0 : id int 
@@ -76,8 +81,8 @@ class Population:
         """
         f_arr = self.get_sex(gen_arr0, 0)
         m_arr = self.get_sex(gen_arr0, 1)
-        f_anc = f_arr[:, 5]
-        m_anc = m_arr[:, 5]
+        f_ancs = f_arr[:, 5]
+        m_ancs = m_arr[:, 5]
         F = len(f_arr)
         E_offspring = self.E_offspring * (self.r * (1 - (self.N / self.K)))
         n_offspring = np.random.poisson(E_offspring, F)
@@ -85,13 +90,8 @@ class Population:
         mating_arr = np.zeros((n_matings, 2))
         for i in np.arange(F):
             if n_matings[i] > 0:
-                anc = f_anc[i]
-                distance = np.abs(m_anc - anc)
-                reduction = 1 - distance
-                scaled = self.c * reduction
-                scaled /= np.sum(scaled)
+                cd = self.get_mating_cd(m_ancs, f_ancs[i])
                 X = np.random.uniform()
-                cd = np.cumsum(scaled)
                 select = np.searchsorted(cd, X)
                 mating_arr[i] = [i, select]
         return(mating_arr)
@@ -105,8 +105,13 @@ class Population:
         return(sub_arr)
         
         
-        
-        
+    def get_mating_cd(self, m_ancs, f_anc):
+        distance = np.abs(m_ancs - f_anc)
+        reduction = 1 - distance
+        scaled = self.c * reduction
+        scaled /= np.sum(scaled)
+        cd = np.cumsum(scaled)
+        return(cd)
         
         
         
