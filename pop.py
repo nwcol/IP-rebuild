@@ -26,7 +26,7 @@ class Population:
     def __init__(self, K, G):
         self.K = K
         self.G = G
-        self.c = 4
+        self.c = 500
         self.E_offspring = 2
         self.r = 1
         self.rows = 6
@@ -39,11 +39,13 @@ class Population:
         None.
         """
         gen_arr1 = self.initialize()
+        self.plot(gen_arr1)
         while self.g > 0:
             self.g -= 1
             gen_arr0 = gen_arr1
             gen_arr1 = self.gen_cycle(gen_arr0)
             self.pop_arr[self.n0:self.n1] = gen_arr1
+            self.plot(gen_arr1)
         self.pop_arr = self.pop_arr[:self.n1]
         
     def initialize(self):
@@ -94,7 +96,7 @@ class Population:
             if n_offspring[i] > 0:
                 cd = self.get_mating_cd(m_ancs, f_ancs[i])
                 X = np.random.uniform()
-                select = np.searchsorted(cd, X)
+                select = np.searchsorted(cd, X) - 1
                 l1 = l0 + n_offspring[i]
                 mating_arr[l0:l1] = [i, select]
                 l0 = l1
@@ -119,7 +121,6 @@ class Population:
         gen_arr1[:, 4] = m_arr[m_ids, 0]
         ancs = np.vstack((f_arr[f_ids, 5], m_arr[m_ids, 5]))
         gen_arr1[:, 5] = np.mean(ancs, 0)
-        
         return(gen_arr1)
  
     def make_arr(self, length):
@@ -142,6 +143,17 @@ class Population:
         pref /= np.sum(pref)
         cd = np.cumsum(pref)
         return(cd)
+    
+    def plot(self, gen_arr):
+        
+        ancs = gen_arr[:,5]
+        bins = np.linspace(0, 1, 101)
+        fig = plt.figure(figsize=(6, 6))
+        sub = fig.add_subplot(111)
+        sub.hist(ancs, bins = bins, color = 'blue')
+        sub.set_ylim(0, self.K)
+        sub.set_xlim(0, 1)
+        sub.set_title(str(gen_arr[0,2]))
         
 
 def mate(gen_arr0):
